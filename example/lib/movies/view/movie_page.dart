@@ -98,9 +98,10 @@ class _ViewMovieState extends State<ViewMovie> {
                     );
                   }
                   return Expanded(
-                    child: PaginatedList<Movie>(
-                      isGrid: true,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+                    child: PaginatedGrid<Movie>(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2),
                       loadingIndicator: const Padding(
                         padding: EdgeInsets.symmetric(vertical: 20),
                         child: Center(
@@ -110,7 +111,8 @@ class _ViewMovieState extends State<ViewMovie> {
                       items: state.movies,
                       isRecentSearch: false,
                       isLastPage: state.isLastPage,
-                      onLoadMore: () => context.read<MovieBloc>().loadMore(),
+                      onLoadMore: (index) =>
+                          context.read<MovieBloc>().loadMore(),
                       builder: (movie, index) => SearchItem(
                         subtitle: movie.overview,
                         title: movie.title,
@@ -141,6 +143,7 @@ class SearchItem extends StatelessWidget {
     required this.title,
     required this.subtitle,
   });
+
   final String imageUrl;
   final String title;
   final String subtitle;
