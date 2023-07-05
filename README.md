@@ -14,12 +14,37 @@ This library makes using pagination easier by giving the user the functions  tha
 ![app example](https://media0.giphy.com/media/xlB7llIT0g76jaOlQ5/giphy.gif?cid=790b7611447c0f905c0babebd5cd6e33597c380c65f9d100&rid=giphy.gif&ct=g)  
 </div>
 
-## Usage
+## List Usage
 ```dart
 import 'package:paginated_list/paginated_list.dart';
 ```
 ```dart
 PaginatedList<Movie>(
+    loadingIndicator: const Padding(
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Center(
+            child: CircularProgressIndicator(color: Colors.black),
+        ),
+    ),
+    items: state.movies,
+    isRecentSearch: false,
+    isLastPage: state.isLastPage,
+    onLoadMore: () => context.read<MovieBloc>().loadMore(),
+    builder: (movie, index) => SearchItem(
+        subtitle: movie.overview,
+        title: movie.title,
+        imageUrl: movie.posterPath ?? '',
+    ),
+),
+```
+
+## Grid Usage
+```dart
+import 'package:paginated_list/paginated_list.dart';
+```
+```dart
+PaginatedGrid<Movie>(
+    gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
     loadingIndicator: const Padding(
         padding: EdgeInsets.symmetric(vertical: 20),
         child: Center(
