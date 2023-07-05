@@ -10,7 +10,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 /// {@endtemplate}
 class PaginatedList<T> extends StatefulWidget {
   /// {@macro paginated_list}
-  const PaginatedList({
+   const PaginatedList({
     super.key,
     this.onTap,
     this.onRemove,
@@ -52,6 +52,8 @@ class PaginatedList<T> extends StatefulWidget {
     required this.builder,
     required this.items,
     required this.isLastPage,
+    required this.isGrid,
+    required this.gridDelegate
   });
 
   /// The list of items to display.
@@ -144,6 +146,10 @@ class PaginatedList<T> extends StatefulWidget {
   /// The alignment of the [deleteIcon].
   final Alignment deleteIconAlignment;
 
+
+   final bool isGrid;
+  final SliverGridDelegate gridDelegate;
+
   @override
   State<PaginatedList<T>> createState() => _PaginatedListState<T>();
 }
@@ -165,7 +171,69 @@ class _PaginatedListState<T> extends State<PaginatedList<T>> {
   Widget build(BuildContext context) {
     final itemCount = widget.items.length +
         (widget.isRecentSearch || widget.isLastPage ? 0 : 1);
-    return ListView.builder(
+    return widget.isGrid? GridView.builder(
+      key: widget.listViewKey,
+      scrollDirection: widget.scrollDirection,
+      reverse: widget.reverse,
+      controller: widget.controller,
+      primary: widget.primary,
+      restorationId: widget.restorationId,
+      semanticChildCount: widget.semanticChildCount,
+      shrinkWrap: widget.shrinkWrap,
+      keyboardDismissBehavior: widget.keyboardDismissBehavior,
+      padding: widget.padding,
+      findChildIndexCallback: widget.findChildIndexCallback,
+      dragStartBehavior: widget.dragStartBehavior,
+      addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
+      addRepaintBoundaries: widget.addRepaintBoundaries,
+      addSemanticIndexes: widget.addSemanticIndexes,
+      cacheExtent: widget.cacheExtent,
+      clipBehavior: widget.clipBehavior,
+      physics: widget.physics,
+      itemCount: itemCount,
+      itemBuilder: (context, index) {
+        return Stack(
+          children: [
+            InkWell(
+              onTap: () => widget.onTap?.call(index),
+              child: Builder(
+                builder: (context) {
+                  if (index == widget.items.length) {
+                    return VisibilityDetector(
+                      key: const Key('loading-more'),
+                      onVisibilityChanged: (visibility) {
+                        visibleFraction.value = visibility.visibleFraction;
+                      },
+                      child: widget.loadingIndicator,
+                    );
+                  } else {
+                    final item = widget.items[index];
+                    return widget.builder.call(item, index);
+                  }
+                },
+              ),
+            ),
+            if (widget.isRecentSearch)
+              Builder(
+                builder: (context) {
+                  final item = widget.items[index];
+                  return Align(
+                    alignment: widget.deleteIconAlignment,
+                    child: IconButton(
+                      onPressed: () {
+                        if (item != null) {
+                          widget.onRemove?.call(item, index);
+                        }
+                      },
+                      icon: widget.deleteIcon,
+                    ),
+                  );
+                },
+              )
+          ],
+        );
+      }, gridDelegate: widget.gridDelegate,
+    ):ListView.builder(
       key: widget.listViewKey,
       scrollDirection: widget.scrollDirection,
       reverse: widget.reverse,
